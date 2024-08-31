@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophia - AI Study Helper</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Sophia - AI-Powered Study Helper</h1>
+    <form method="POST">
+        <textarea name="input_text" rows="10" cols="50" placeholder="Paste your notes here..."></textarea><br><br>
+        <button type="submit">Generate Summary & Questions</button>
+    </form>
+
+    {% if summary %}
+        <h2>Summary:</h2>
+        <p>{{ summary }}</p>
+
+        <h2>Quiz Questions:</h2>
+        <ul>
+        {% for question in questions %}
+            <li>{{ question }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
