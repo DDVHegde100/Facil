@@ -5,92 +5,148 @@
     <title>Facil - AI-Powered Study Helper</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        /* Add custom styles for typing effect and loading animation */
+        /* Import modern Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Global Styles */
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-        h1 {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #777777; /* Light background for better contrast */
             color: #333;
         }
+        
+        header {
+            background: #ff5722; /* Vibrant orange header */
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 4px solid #e64a19; /* Slightly darker shade for depth */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow for a modern touch */
+        }
+        
+        .container {
+            width: 80%;
+            max-width: 1200px; /* Max width for larger screens */
+            margin: 20px auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 16px; /* Rounded corners for the container */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Soft shadow */
+        }
+
         textarea {
             width: 100%;
             height: 150px;
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 10px 20px;
+            padding: 12px;
+            border-radius: 8px; /* Rounded corners */
+            border: 2px solid #ddd;
             font-size: 16px;
-            background-color: #4CAF50;
+            font-family: 'Roboto', sans-serif;
+            transition: border-color 0.3s ease; /* Smooth transition for focus */
+        }
+
+        textarea:focus {
+            border-color: #ff5722; /* Orange border on focus */
+            outline: none;
+        }
+
+        button {
+            background-color: #ff5722; /* Orange button */
             color: white;
             border: none;
+            padding: 12px 24px;
+            border-radius: 8px; /* Rounded corners */
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease; /* Smooth hover transition */
         }
+
         button:hover {
-            background-color: #45a049;
+            background-color: #e64a19; /* Slightly darker shade on hover */
         }
+
         .summary, .questions {
             margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px; /* Rounded corners for sections */
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05); /* Softer shadow */
+            border-left: 4px solid #ff5722; /* Highlight border */
         }
-        .summary p, .questions li {
-            font-size: 18px;
-            line-height: 1.6;
+
+        .questions ul {
+            list-style-type: none;
+            padding: 0;
         }
-        .highlight {
-            background-color: yellow;
-            font-weight: bold;
+
+        .questions li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
         }
-        /* Spinner styles */
+
+        .questions li:last-child {
+            border-bottom: none;
+        }
+
         .spinner {
             display: none;
-            margin: auto;
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #3498db;
+            margin: 20px auto;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #ff5722; /* Orange spinner */
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 2s linear infinite;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.2s linear infinite; /* Faster animation */
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Typing effect styles */
+
         .typing {
             font-size: 18px;
             white-space: pre-wrap;
-            border-right: 0.1em solid;
+            border-right: 0.1em solid #ff5722; /* Orange typing cursor */
             overflow: hidden;
+            padding: 10px;
+            line-height: 1.6;
+            animation: blink-caret 0.8s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+            50% { border-color: transparent; }
         }
     </style>
 </head>
 <body>
-    <h1>Facil - AI-Powered Study Helper</h1>
-    <form method="POST" id="inputForm">
-        <textarea name="input_text" placeholder="Enter your text here..." required></textarea><br>
-        <button type="submit">Summarize and Generate Questions</button>
-    </form>
+    <header>
+        <h1>Facil - AI-Powered Study Helper</h1>
+    </header>
+    <div class="container">
+        <form method="POST" id="inputForm">
+            <textarea name="input_text" placeholder="Enter your text here..." required></textarea><br>
+            <button type="submit">Summarize and Generate Questions</button>
+        </form>
 
-    <!-- Loading Spinner -->
-    <div id="spinner" class="spinner"></div>
+        <!-- Loading Spinner -->
+        <div id="spinner" class="spinner"></div>
 
-    {% if summary %}
         <!-- Summary with Typing Effect -->
         <div class="summary">
             <h2>Summary</h2>
             <p id="typed-summary" class="typing"></p>
         </div>
-    {% endif %}
-    {% if questions %}
+
+        <!-- Questions Section -->
         <div class="questions">
             <h2>Quiz Questions</h2>
-            <ul id="questions-list">
-                {% for question in questions %}
-                    <li>{{ question }}</li>
-                {% endfor %}
-            </ul>
+            <ul id="questions-list"></ul>
         </div>
-    {% endif %}
+    </div>
 
     <script>
         document.getElementById('inputForm').addEventListener('submit', function() {
@@ -98,7 +154,8 @@
         });
 
         // Function to simulate typing effect
-        function typeText(element, text, delay = 50) {
+        // Function to simulate typing effect
+        function typeText(element, text, delay = 5) { // Reduced delay to 5ms for faster typing
             let i = 0;
             function typing() {
                 if (i < text.length) {
@@ -112,12 +169,22 @@
             typing();
         }
 
+
         // Trigger typing effect after page loads with Flask data
         window.onload = function() {
             const summary = `{{ summary|safe }}`;
+            const questionsList = {{ questions|tojson }};
             if (summary.trim().length > 0) {
                 const typedSummaryElement = document.getElementById('typed-summary');
                 typeText(typedSummaryElement, summary, 50);
+            }
+            if (questionsList.length > 0) {
+                const questionsListElement = document.getElementById('questions-list');
+                questionsList.forEach((question) => {
+                    const li = document.createElement('li');
+                    li.textContent = question;
+                    questionsListElement.appendChild(li);
+                });
             }
         };
     </script>
