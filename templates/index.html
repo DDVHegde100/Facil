@@ -2,27 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sophia - AI Study Helper</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Facil - AI-Powered Study Helper</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Add custom styles for typing effect and loading animation */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .summary, .questions {
+            margin-top: 30px;
+        }
+        .summary p, .questions li {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        /* Spinner styles */
+        .spinner {
+            display: none;
+            margin: auto;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Typing effect styles */
+        .typing {
+            font-size: 18px;
+            white-space: pre-wrap;
+            border-right: 0.1em solid;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-    <h1>Sophia - AI-Powered Study Helper</h1>
-    <form method="POST">
-        <textarea name="input_text" rows="10" cols="50" placeholder="Paste your notes here..."></textarea><br><br>
-        <button type="submit">Generate Summary & Questions</button>
+    <h1>Facil - AI-Powered Study Helper</h1>
+    <form method="POST" id="inputForm">
+        <textarea name="input_text" placeholder="Enter your text here..." required></textarea><br>
+        <button type="submit">Summarize and Generate Questions</button>
     </form>
 
-    {% if summary %}
-        <h2>Summary:</h2>
-        <p>{{ summary }}</p>
+    <!-- Loading Spinner -->
+    <div id="spinner" class="spinner"></div>
 
-        <h2>Quiz Questions:</h2>
-        <ul>
-        {% for question in questions %}
-            <li>{{ question }}</li>
-        {% endfor %}
-        </ul>
+    {% if summary %}
+        <!-- Summary with Typing Effect -->
+        <div class="summary">
+            <h2>Summary</h2>
+            <p id="typed-summary" class="typing"></p>
+        </div>
     {% endif %}
+    {% if questions %}
+        <div class="questions">
+            <h2>Quiz Questions</h2>
+            <ul id="questions-list">
+                {% for question in questions %}
+                    <li>{{ question }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <script>
+        document.getElementById('inputForm').addEventListener('submit', function() {
+            document.getElementById('spinner').style.display = 'block';
+        });
+
+        // Function to simulate typing effect
+        function typeText(element, text, delay = 50) {
+            let i = 0;
+            function typing() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typing, delay);
+                } else {
+                    document.getElementById('spinner').style.display = 'none';
+                }
+            }
+            typing();
+        }
+
+        // Trigger typing effect after page loads with Flask data
+        window.onload = function() {
+            const summary = `{{ summary|safe }}`;
+            if (summary.trim().length > 0) {
+                const typedSummaryElement = document.getElementById('typed-summary');
+                typeText(typedSummaryElement, summary, 50);
+            }
+        };
+    </script>
 </body>
 </html>

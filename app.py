@@ -1,20 +1,24 @@
-from flask import Flask, request, render_template
-from summarizer import generate_summary
+from flask import Flask, request, render_template, jsonify
+from summarizer import summarize_text
 from question_generator import generate_questions
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/')
 def index():
-    summary = ""
-    questions = []
+    return render_template('index.html')
 
-    if request.method == "POST":
-        input_text = request.form["input_text"]
-        summary = generate_summary(input_text)
-        questions = generate_questions(input_text)
+@app.route('/summarize', methods=['POST'])
+def summarize():
+    content = request.json.get('content', '')
+    summary = summarize_text(content)
+    return jsonify({'summary': summary})
 
-    return render_template("index.html", summary=summary, questions=questions)
+@app.route('/generate_questions', methods=['POST'])
+def generate():
+    content = request.json.get('content', '')
+    questions = generate_questions(content)
+    return jsonify({'questions': questions})
 
 if __name__ == "__main__":
     app.run(debug=True)
